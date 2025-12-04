@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="exam-header">
+    <h1>📤 Public File Upload</h1>
+    <p>Contribute previous question papers for the community.</p>
+    <p class="hint" style="text-align: center;">No registration required to upload.</p>
+</div>
+
+<section class="card upload-card" style="border-left-color: #059669; max-width: 800px; margin: 0 auto;">
+    <div class="card-header">
+        <h3 style="color: #065f46;">Upload New Paper</h3>
+    </div>
+    
+    <form action="{{ url_for('upload_paper') }}" method="POST" enctype="multipart/form-data" class="modern-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Branch</label>
+                <select name="branch" required>
+                    <option value="" disabled selected>Select Branch</option>
+                    {% for branch in branches %}<option value="{{ branch }}">{{ branch }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Semester</label>
+                <select name="semester" required>
+                    <option value="" disabled selected>Select Sem</option>
+                    {% for sem in semesters %}<option value="{{ sem }}">{{ sem }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Subject Name</label>
+                <input type="text" name="subject" placeholder="e.g. Java Programming" required>
+            </div>
+            <div class="form-group">
+                <label>Exam Type</label>
+                <select name="exam_type" required>
+                    <option value="" disabled selected>Select Type</option>
+                    <option value="Mid 1">Mid 1</option>
+                    <option value="Mid 2">Mid 2</option>
+                    <option value="Semester">Semester End Exam</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Exam Year</label>
+                <input type="number" name="year" placeholder="e.g. 2024" min="2015" max="2030" required>
+            </div>
+            <div class="form-group">
+                <label>Contributor Name</label>
+                <input type="text" name="contributor" placeholder="Your Name (Optional)" >
+            </div>
+            <div class="form-group">
+                <label>PDF File</label>
+                <input type="file" name="file" accept=".pdf" required>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary" style="background-color: #059669; margin-top: 1rem;">🚀 Upload Paper</button>
+    </form>
+</section>
+{% endblock %}

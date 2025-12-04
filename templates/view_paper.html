@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure View - SBTET Analytics</title>
+    <style>
+        body, html { 
+            margin: 0; padding: 0; height: 100%; overflow: hidden; 
+            background: #1a1a1a; 
+            user-select: none; -webkit-user-select: none;
+        }
+        .toolbar {
+            height: 50px; background: #111827; color: white; display: flex; 
+            align-items: center; padding: 0 20px; justify-content: space-between;
+            font-family: system-ui, sans-serif; border-bottom: 1px solid #374151;
+        }
+        .watermark {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 5rem; color: rgba(255, 0, 0, 0.1); font-weight: bold; pointer-events: none; z-index: 9998;
+        }
+        iframe { width: 100%; height: calc(100% - 50px); border: none; display: block; }
+        .close-btn { background: #dc2626; color: white; text-decoration: none; padding: 6px 15px; border-radius: 4px; }
+    </style>
+</head>
+<body oncontextmenu="return false;"> 
+    <div class="toolbar">
+        <span>🔒 Secure View Mode (Read Only)</span>
+        <a href="javascript:window.close()" class="close-btn">Close Viewer</a>
+    </div>
+    <div class="watermark">PROPERTY OF SBTET ANALYTICS</div>
+    <iframe src="{{ file_url }}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" type="application/pdf"></iframe>
+    <script>
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey && (e.key === 's' || e.key === 'p')) || e.key === 'PrintScreen') {
+                e.preventDefault();
+                alert("Security Alert: Downloading and Printing are disabled.");
+            }
+        });
+        window.addEventListener('blur', function() { document.body.style.opacity = '0.1'; });
+        window.addEventListener('focus', function() { document.body.style.opacity = '1'; });
+    </script>
+</body>
+</html>

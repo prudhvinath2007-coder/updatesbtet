@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+    <section class="card" style="width: 100%; max-width: 400px; text-align: center; border-top: 5px solid #2563eb;">
+        <h2 style="color: #111827; margin-bottom: 0.5rem;">👋 Welcome Back</h2>
+        <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">Please login to continue.</p>
+        
+        <form action="{{ url_for('login') }}" method="POST">
+            <div style="text-align: left; margin-bottom: 1rem;">
+                <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Username</label>
+                <input type="text" name="username" required placeholder="Enter username" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+            </div>
+            
+            <div style="text-align: left; margin-bottom: 1.5rem;">
+                <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Password</label>
+                <input type="password" name="password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+            </div>
+            
+            <button type="submit" style="width: 100%; background: #2563eb; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>
+        </form>
+        
+        <p style="margin-top: 1.5rem; font-size: 0.9rem;">
+            New Student? <a href="{{ url_for('register') }}" style="color: #2563eb; font-weight: bold;">Create Account</a>
+        </p>
+    </section>
+</div>
+{% endblock %}

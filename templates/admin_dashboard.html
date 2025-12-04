@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="exam-header">
+    <h1 style="color: #dc2626;">🛡️ Admin Dashboard</h1>
+    <p>Manage uploaded files. <strong style="color: #dc2626;">Deletions are permanent.</strong></p>
+    <div style="display: flex; justify-content: center; gap: 10px; align-items: center; margin-top: 10px;">
+        <div style="background: #fff; padding: 5px 15px; border-radius: 5px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            Total Site Visits: <span style="color: #2563eb;">{{ total_hits }}</span>
+        </div>
+        <a href="{{ url_for('admin_logout') }}" style="display: inline-block; color: #dc2626; border: 1px solid #dc2626; padding: 5px 15px; border-radius: 5px; text-decoration: none;">Logout</a>
+    </div>
+</div>
+
+<div class="library-container">
+    {% for branch, sems in library.items() %}
+    <div class="branch-section">
+        <h2 class="branch-heading"><span>{{ branch }}</span></h2>
+        
+        <div class="sem-wrapper">
+            {% for sem_name, subjects in sems.items() %}
+            <details class="sem-accordion">
+                <summary>
+                    <span class="sem-title">{{ sem_name }}</span>
+                    <span class="paper-count">
+                        {% set count = namespace(value=0) %}
+                        {% for s, p in subjects.items() %}{% set count.value = count.value + p|length %}{% endfor %}
+                        {{ count.value }} Files
+                    </span>
+                </summary>
+                
+                <div class="accordion-content">
+                    {% if subjects %}
+                        {% for subject_name, papers in subjects.items() %}
+                        <div class="subject-group">
+                            <h4>{{ subject_name }}</h4>
+                            <div class="paper-grid">
+                                {% for paper in papers %}
+                                <div class="paper-card" style="border-color: #fca5a5; background: #fff1f2;">
+                                    <div class="paper-info">
+                                        <strong style="color: #991b1b; font-size: 0.85rem;">{{ paper.filename }}</strong><br>
+                                        <small style="color: #7f1d1d;">Contributor: {{ paper.contributor }} | {{ paper.exam_type }}</small>
+                                    </div>
+                                    
+                                    <form action="{{ url_for('delete_paper') }}" method="POST" onsubmit="return confirm('⚠️ DANGER: Are you sure you want to permanently delete {{ paper.filename }}?');" style="margin-top: 10px;">
+                                        <input type="hidden" name="branch" value="{{ branch }}">
+                                        <input type="hidden" name="sem" value="{{ sem_name }}">
+                                        <input type="hidden" name="filename" value="{{ paper.filename }}">
+                                        
+                                        <button type="submit" style="width: 100%; background: #ef4444; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                            🗑 DELETE PERMANENTLY
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="empty-msg">No files found.</p>
+                    {% endif %}
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

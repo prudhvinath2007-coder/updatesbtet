@@ -1,0 +1,185 @@
+<!-- templates/result.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .result-header { text-align: center; margin-bottom: 2rem; color: #1f2937; }
+    .summary-card { background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%); border-left: 5px solid #2563eb; }
+    .highlight-card { transition: transform 0.2s; border: 1px solid #e5e7eb; }
+    .highlight-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    .grade-badge { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; font-weight: bold; }
+    .table-wrapper { border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden; border: 1px solid #e5e7eb; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead th { background-color: #1f2937; color: white; border: none; padding: 12px; text-align: left; }
+    .data-table tbody td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+    .data-table tbody tr:nth-child(even) { background-color: #f9fafb; }
+    .data-table tbody tr:hover { background-color: #f3f4f6; }
+</style>
+
+<h1 class="result-header">Student Performance Report</h1>
+
+<section class="card summary-card">
+    <h2>🎓 Student Profile</h2>
+    <div class="summary-grid">
+        <div>
+            <strong>Name:</strong> {{ summary.student_name or "N/A" }}<br>
+            <strong>PIN:</strong> {{ summary.pin or pin }}<br>
+            <strong>Branch:</strong> {{ summary.branch_code }} ({{ summary.scheme }})
+        </div>
+        <div>
+            <strong>Center:</strong> {{ summary.center_name }} ({{ summary.center_code }})<br>
+            <strong>CGPA:</strong> {{ summary.cgpa or "N/A" }}<br>
+            <strong>Credits:</strong> {{ summary.credits_gained }}/{{ summary.total_max_credits }}
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>📈 Semester Progress</h2>
+    {% if sgpa_info %}
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Semester</th>
+                <th>Credits</th>
+                <th>Total Grade Points</th>
+                <th>SGPA</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in sgpa_info %}
+            <tr>
+                <td>{{ row.semester }}</td>
+                <td>{{ row.credits }}</td>
+                <td>{{ row.total_grade_points }}</td>
+                <td><span class="grade-badge">{{ row.sgpa }}</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <canvas id="sgpaChart" class="chart"></canvas>
+    {% else %}
+    <p>No semester data available.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>🏆 Highlights & Insights</h2>
+    <div class="two-col">
+        <div class="highlight-card" style="padding: 1rem; border-radius: 8px;">
+            <h3 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 5px; margin-bottom: 10px;">Best Performance</h3>
+            
+            <p><strong>Theory:</strong> 
+            {% if insights.best_theory %}
+                {{ insights.best_theory.SubjectName }} ({{ insights.best_theory.SubjectTotal }} Marks)
+            {% else %}N/A{% endif %}
+            </p>
+
+            <p><strong>Lab:</strong>
+            {% if insights.best_lab %}
+                {{ insights.best_lab.SubjectName }} ({{ insights.best_lab.SubjectTotal }} Marks)
+            {% else %}N/A{% endif %}
+            </p>
+        </div>
+
+        <div class="highlight-card" style="padding: 1rem; border-radius: 8px;">
+            <h3 style="color: #dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 5px; margin-bottom: 10px;">Areas for Improvement</h3>
+            {% if insights.weak_subjects %}
+            <ul style="padding-left: 20px;">
+                {% for s in insights.weak_subjects[:3] %}
+                <li>
+                    {{ s.SubjectName }} – <span style="color: #dc2626; font-weight: bold;">{{ s.HybridGrade }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No weak subjects detected (nice!).</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Top Subjects</h2>
+    {% if insights.top_subjects %}
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Semester</th>
+                <th>Marks</th>
+                <th>Grade</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for s in insights.top_subjects %}
+            <tr>
+                <td>{{ s.SubjectName }}</td>
+                <td>{{ s.Subject_Code }}</td>
+                <td>{{ s.Type }}</td>
+                <td>{{ s.Semester }}</td>
+                <td>{{ s.SubjectTotal }}</td>
+                <td><span class="grade-badge" style="background: #ecfdf5; color: #047857;">{{ s.HybridGrade }}</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No subjects found.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>All Subjects</h2>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Semester</th>
+                <th>Subject</th>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Marks</th>
+                <th>Grade</th>
+                <th>Grade Point</th>
+                <th>Credits</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for s in subjects %}
+            <tr>
+                <td>{{ s.Semester }}</td>
+                <td>{{ s.SubjectName }}</td>
+                <td>{{ s.Subject_Code }}</td>
+                <td>{{ s.Type }}</td>
+                <td>{{ s.SubjectTotal }}</td>
+                <td>{{ s.HybridGrade }}</td>
+                <td>{{ s.GradePoint }}</td>
+                <td>{{ s.CreditsGained }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+<section class="card">
+    <h2>Grade Distribution</h2>
+    <canvas id="gradeChart" class="chart"></canvas>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Data from Flask context to JS for charts
+    const sgpaData = {{ sgpa_info | tojson }};
+    const gradeCounts = {{ insights.grade_counts | tojson }};
+</script>
+{% endblock %}

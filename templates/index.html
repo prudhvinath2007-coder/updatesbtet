@@ -1,0 +1,39 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .hero-section { text-align: center; padding: 4rem 1rem; }
+    .search-card { max-width: 500px; margin: 0 auto; border-top: 5px solid #2563eb; padding: 2rem; transform: scale(1); transition: transform 0.3s; }
+    .search-card:hover { transform: scale(1.02); }
+    .pin-input { font-size: 1.2rem; padding: 1rem; border: 2px solid #e5e7eb; transition: border-color 0.3s; width: 100%; border-radius: 0.5rem; }
+    .pin-input:focus { border-color: #2563eb; outline: none; }
+    .search-btn { background: linear-gradient(to right, #2563eb, #1d4ed8); font-size: 1.1rem; padding: 1rem; width: 100%; border: none; color: white; border-radius: 0.5rem; cursor: pointer; transition: opacity 0.3s; font-weight: bold; margin-top: 1rem; }
+    .search-btn:hover { opacity: 0.9; }
+    .feature-list { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
+    .feature-pill { background: #fff; padding: 0.6rem 1.2rem; border-radius: 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 0.95rem; color: #4b5563; border: 1px solid #f3f4f6; }
+</style>
+
+<div class="hero-section">
+    <h1 style="font-size: 2.5rem; color: #111827; margin-bottom: 0.5rem; font-weight: 800;">SBTET Result Analytics</h1>
+    <p style="color: #6b7280; font-size: 1.2rem;">Instant performance insights, trends, and visualisations.</p>
+</div>
+
+<section class="card search-card">
+    <h2 style="text-align: center; margin-bottom: 1.5rem; color: #1f2937;">View Your Results</h2>
+    <form method="POST" action="{{ url_for('index') }}" class="pin-form" style="max-width: 100%;">
+        <div class="form-group">
+            <label for="pin" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; font-weight: 700;">Student PIN</label>
+            <input type="text" id="pin" name="pin" class="pin-input" placeholder="e.g. 23004-CS-066" required>
+        </div>
+        <button type="submit" class="search-btn">Analyze Results 🚀</button>
+    </form>
+</section>
+
+<div class="feature-list">
+    <span class="feature-pill">📊 SGPA Trends</span>
+    <span class="feature-pill">🏆 Best Subjects</span>
+    <span class="feature-pill">📉 Weak Areas</span>
+    <span class="feature-pill">🥧 Grade Distribution</span>
+</div>
+{% endblock %}

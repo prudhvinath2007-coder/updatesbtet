@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .branch-section { margin-bottom: 2rem; }
+    .branch-heading {
+        color: #1f2937;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .branch-heading span { color: #2563eb; }
+    
+    .sem-accordion {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+    }
+    .sem-accordion[open] { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    
+    .sem-summary {
+        padding: 1rem;
+        cursor: pointer;
+        background: #f9fafb;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    .sem-summary:hover { background: #f3f4f6; }
+    .sem-accordion[open] .sem-summary { background: #eff6ff; color: #1d4ed8; border-bottom: 1px solid #e5e7eb; }
+    
+    .paper-count {
+        background: #e5e7eb;
+        color: #374151;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+    }
+    
+    .paper-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .paper-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 4px solid #3b82f6;
+    }
+    .paper-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .paper-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    
+    .paper-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+    
+    .paper-meta {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-view {
+        background: #10b981;
+        color: white;
+        text-decoration: none;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .btn-view:hover { background: #059669; }
+    
+    .empty-msg {
+        text-align: center;
+        padding: 2rem;
+        color: #9ca3af;
+        font-style: italic;
+    }
+</style>
+
+<div class="exam-header">
+    <h1>📚 Exam Paper Library</h1>
+    <p>Access previous question papers contributed by students.</p>
+    <p style="margin-top: 10px; font-size: 0.9rem;">
+        Have a paper to share? <a href="{{ url_for('public_upload') }}" style="color: #2563eb; font-weight: bold;">Upload it here</a>.
+    </p>
+</div>
+
+<!-- Library Section (View Only) -->
+<div class="library-container">
+    {% for branch, sems in library.items() %}
+    <div class="branch-section">
+        <h2 class="branch-heading"><span>{{ branch }}</span> Department</h2>
+        
+        <div class="sem-wrapper">
+            {% for sem_name, subjects in sems.items() %}
+            <details class="sem-accordion">
+                <summary class="sem-summary">
+                    <span class="sem-title">{{ sem_name }}</span>
+                    <span class="paper-count">
+                        {% set count = namespace(value=0) %}
+                        {% for s, p in subjects.items() %}{% set count.value = count.value + p|length %}{% endfor %}
+                        {{ count.value }} Papers
+                    </span>
+                </summary>
+                
+                <div class="accordion-content" style="padding: 0;">
+                    {% if subjects %}
+                        {% for subject_name, papers in subjects.items() %}
+                        <div style="padding: 1rem; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                            <h4 style="margin: 0; color: #4b5563;">📘 {{ subject_name }}</h4>
+                        </div>
+                        <div class="paper-grid">
+                            {% for paper in papers %}
+                            <div class="paper-card">
+                                <div class="paper-header">
+                                    {% if paper.exam_type == 'Semester' %}
+                                        <span class="badge badge-sem">Semester</span>
+                                    {% else %}
+                                        <span class="badge badge-mid">{{ paper.exam_type }}</span>
+                                    {% endif %}
+                                    <span class="year-text">{{ paper.year }}</span>
+                                </div>
+                                <div>
+                                    <div class="paper-title">{{ paper.filename }}</div>
+                                    <div class="paper-meta">By: {{ paper.contributor }}</div>
+                                </div>
+                                <a href="{{ url_for('view_paper', branch=branch, sem=sem_name, filename=paper.filename) }}" target="_blank" class="btn-view">
+                                    👁 View Paper
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="empty-msg">No papers uploaded for this semester yet.</p>
+                    {% endif %}
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

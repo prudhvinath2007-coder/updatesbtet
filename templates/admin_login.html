@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+    <section class="card" style="width: 100%; max-width: 400px; text-align: center; border-top: 5px solid #111827;">
+        <h2 style="color: #111827; margin-bottom: 0.5rem;">🔒 Admin Access</h2>
+        <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">Restricted area. Authorized personnel only.</p>
+        
+        <form action="{{ url_for('admin_login') }}" method="POST">
+            <div style="text-align: left; margin-bottom: 1rem;">
+                <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Password</label>
+                <input type="password" name="password" required placeholder="••••••" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+            </div>
+            <button type="submit" style="width: 100%; background: #111827; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Login Dashboard</button>
+        </form>
+    </section>
+</div>
+{% endblock %}
