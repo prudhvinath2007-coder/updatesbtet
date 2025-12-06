@@ -11,6 +11,9 @@
         <a href="{{ url_for('admin_logout') }}" style="display: inline-block; color: #dc2626; border: 1px solid #dc2626; padding: 5px 15px; border-radius: 5px; text-decoration: none;">Logout</a>
     </div>
 </div>
+<script nonce="{{ csp_nonce }}">
+console.log("OK");
+</script>
 
 <div class="library-container">
     {% for branch, sems in library.items() %}

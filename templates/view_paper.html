@@ -2,42 +2,341 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Secure View - SBTET Analytics</title>
+    <title>Secure Document Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Content Security Policy (recommend server also send CSP header) -->
+    <!-- pdf.js (self-hosted to avoid tracking/prevention blocking) -->
+<script src="{{ url_for('static', filename='vendor/pdfjs/pdf.min.js') }}"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ url_for('static', filename='vendor/pdfjs/pdf.worker.min.js') }}";
+</script>
+
+    <script nonce="{{ g.csp_nonce }}">  </script>
     <style>
-        body, html { 
-            margin: 0; padding: 0; height: 100%; overflow: hidden; 
-            background: #1a1a1a; 
-            user-select: none; -webkit-user-select: none;
+        :root {
+            --bg-color: #0b0b0b;
+            --toolbar-bg: #111827;
+            --text-color: #e5e7eb;
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: pan-y; /* allow vertical scroll only */
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        /* Top Toolbar */
         .toolbar {
-            height: 50px; background: #111827; color: white; display: flex; 
-            align-items: center; padding: 0 20px; justify-content: space-between;
-            font-family: system-ui, sans-serif; border-bottom: 1px solid #374151;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: var(--toolbar-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            z-index: 3000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-        .watermark {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 5rem; color: rgba(255, 0, 0, 0.1); font-weight: bold; pointer-events: none; z-index: 9998;
+        .close-btn {
+            background: #dc2626;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
-        iframe { width: 100%; height: calc(100% - 50px); border: none; display: block; }
-        .close-btn { background: #dc2626; color: white; text-decoration: none; padding: 6px 15px; border-radius: 4px; }
+
+        /* PDF Container */
+        #pdf-container {
+            height: 100vh;
+            padding-top: 64px;
+            padding-bottom: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            text-align: center;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;
+        }
+        #pdf-container::-webkit-scrollbar { display: none; }
+
+        .page-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 0 auto 15px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            line-height: 0;
+            background: #fff;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto !important;
+            background: #fff;
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+
+        /* Shield intercepts long-press/drag but allows vertical scroll */
+        .interaction-shield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            background: transparent;
+            touch-action: pan-y;
+        }
+
+        /* Loading Spinner */
+        #loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4000;
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.08);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Hide everything when printing */
+        @media print {
+            body * { display: none !important; }
+        }
     </style>
 </head>
-<body oncontextmenu="return false;"> 
+<body>
     <div class="toolbar">
-        <span>🔒 Secure View Mode (Read Only)</span>
-        <a href="javascript:window.close()" class="close-btn">Close Viewer</a>
+        <span style="font-size:0.95rem;">🔒 Protected View</span>
+        <a href="javascript:window.close()" class="close-btn">Close</a>
     </div>
-    <div class="watermark">PROPERTY OF SBTET ANALYTICS</div>
-    <iframe src="{{ file_url }}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" type="application/pdf"></iframe>
-    <script>
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey && (e.key === 's' || e.key === 'p')) || e.key === 'PrintScreen') {
-                e.preventDefault();
-                alert("Security Alert: Downloading and Printing are disabled.");
+
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div id="pdf-container" aria-live="polite"></div>
+
+    <script nonce="{{ csp_nonce }}">
+    // Basic config
+    const url = "{{ url_for('secure_get_pdf', branch=branch, sem=sem, filename=filename) }}"; // used for fetch auth only
+    const viewer = "{{ viewer|e }}";
+    const viewerMeta = {{ viewer_meta|tojson }};
+    const container = document.getElementById('pdf-container');
+    const loader = document.getElementById('loader');
+    const viewerToken = "{{ viewer_token|e }}";
+    // Prevent selection / common copy keys
+    document.addEventListener('selectstart', e => e.preventDefault());
+    document.addEventListener('dragstart', e => e.preventDefault());
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'P' || e.key === 'S')) ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) || e.key === 'PrintScreen') {
+            e.preventDefault(); e.stopPropagation(); return false;
+        }
+    });
+
+    // Show friendly error
+    function showLoaderError(msg) {
+        loader.innerHTML = `<div style="color:tomato; text-align:center; max-width:360px;">${msg}</div>`;
+        loader.style.display = 'block';
+    }
+
+    // Fetch PDF as ArrayBuffer and log metadata for debugging
+    async function fetchPdfArrayBuffer() {
+        try {
+
+            const resp = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+    cache: 'no-store',
+    headers: {
+        'Cache-Control': 'no-store',
+        'X-Viewer-Token': viewerToken
+    }
+});
+            console.log('[viewer] secure-get-pdf response status:', resp.status, 'redirected:', resp.redirected);
+            console.log('[viewer] content-type:', resp.headers.get('content-type'));
+
+            if (!resp.ok) {
+                throw new Error(`Server returned status ${resp.status}`);
             }
+
+            // If server redirected to an HTML login page, content-type will not be 'application/pdf'
+            const ct = (resp.headers.get('content-type') || '').toLowerCase();
+            if (!ct.includes('pdf')) {
+                // attempt to read text body for debugging
+                const text = await resp.text().catch(()=>null);
+                console.error('[viewer] Expected PDF but server returned:', { status: resp.status, contentType: ct, bodySnippet: text ? text.substring(0,800) : null });
+                throw new Error('Received non-PDF response from server (likely a redirect to login or an error page).');
+            }
+
+            const ab = await resp.arrayBuffer();
+            console.log('[viewer] fetched arrayBuffer size:', ab.byteLength);
+            return ab;
+        } catch (err) {
+            console.error('[viewer] fetchPdfArrayBuffer error:', err);
+            throw err;
+        }
+    }
+
+    // Primary renderer: try arrayBuffer (hides URL). On failure, fallback to PDF.js direct URL with credentials.
+    async function renderPDF() {
+        try {
+            // Try ArrayBuffer path first
+            const arrayBuffer = await fetchPdfArrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer, password: null });
+            const pdf = await loadingTask.promise;
+            loader.style.display = 'none';
+            await renderPages(pdf);
+            // keep watermark timestamps fresh
+            window.watermarkUpdateInterval = setInterval(updateWatermarkTimestamps, 60 * 1000);
+            return;
+        } catch (err) {
+            console.warn('[viewer] ArrayBuffer approach failed, attempting URL fallback:', err);
+            // Fallback: try letting PDF.js fetch the URL with credentials (useful for debugging auth/CSP)
+            try {
+                loader.innerHTML = '<div style="color:lightyellow; text-align:center;">Attempting fallback load (URL) — check Console/Network for details...</div>';
+                const loadingTask = pdfjsLib.getDocument({ url: url, withCredentials: true });
+                const pdf = await loadingTask.promise;
+                loader.style.display = 'none';
+                await renderPages(pdf);
+                window.watermarkUpdateInterval = setInterval(updateWatermarkTimestamps, 60 * 1000);
+                return;
+            } catch (err2) {
+                console.error('[viewer] URL fallback also failed:', err2);
+                showLoaderError('Failed to load document. Open DevTools → Network/Console for details.');
+                return;
+            }
+        }
+    }
+
+    // common page rendering routine
+    async function renderPages(pdf) {
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'page-wrapper';
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d', { alpha: false });
+            wrapper.appendChild(canvas);
+
+            // responsive scaling
+            const baseViewport = page.getViewport({ scale: 1.0 });
+            const availableWidth = Math.min(window.innerWidth - 20, 1000);
+            const scale = availableWidth / baseViewport.width;
+            const outputScale = window.devicePixelRatio || 1;
+            const renderViewport = page.getViewport({ scale: scale * outputScale });
+
+            canvas.width = Math.round(renderViewport.width);
+            canvas.height = Math.round(renderViewport.height);
+            canvas.style.width = (canvas.width / outputScale) + 'px';
+            canvas.style.height = (canvas.height / outputScale) + 'px';
+
+            await page.render({ canvasContext: context, viewport: renderViewport }).promise;
+
+            // include viewer identity in watermark if any
+            drawBakedWatermark(context, canvas.width, canvas.height, pageNum, viewer, viewerMeta);
+
+            // interaction shield
+            const shield = document.createElement('div');
+            shield.className = 'interaction-shield';
+            shield.addEventListener('contextmenu', e => e.preventDefault());
+            let touchStartTime = 0;
+            shield.addEventListener('touchstart', (e) => {
+                touchStartTime = Date.now();
+                if (e.touches.length > 1) e.preventDefault();
+            }, { passive: false });
+            shield.addEventListener('touchend', (e) => {
+                const dt = Date.now() - touchStartTime;
+                if (dt > 650) { e.preventDefault(); }
+            }, { passive: false });
+            shield.addEventListener('dragstart', e => e.preventDefault());
+
+            wrapper.appendChild(shield);
+            container.appendChild(wrapper);
+        }
+    }
+
+    // Draw watermark (now accepts viewer identity)
+    function drawBakedWatermark(ctx, width, height, pageNum, viewerName, viewerMeta) {
+        const timestamp = new Date().toLocaleString();
+        const identity = (() => {
+            try {
+                if (viewerMeta && viewerMeta.mobile) return `${viewerName || 'User'} • ${viewerMeta.mobile}`;
+            } catch(_) {}
+            return viewerName || 'User';
+        })();
+        const watermarkText = `SBTET • CONFIDENTIAL • ${identity} • ${timestamp} • PAGE ${pageNum}`;
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#ff0000';
+        const fontSize = Math.max(20, Math.floor(Math.min(width, height) / 18));
+        ctx.font = `${fontSize}px Inter, system-ui, sans-serif`;
+        const angle = -25 * Math.PI / 180;
+        ctx.translate(width / 2, height / 2);
+        ctx.rotate(angle);
+        const textWidth = ctx.measureText(watermarkText).width;
+        const stepX = Math.floor(textWidth * 1.6);
+        const stepY = Math.floor(fontSize * 5.2);
+        for (let y = -height; y < height; y += stepY) {
+            for (let x = -width; x < width; x += stepX) {
+                ctx.fillText(watermarkText, x, y);
+            }
+        }
+        ctx.restore();
+    }
+
+    // Transient overlay timestamp (unchanged)
+    function updateWatermarkTimestamps() {
+        const wrappers = container.querySelectorAll('.page-wrapper');
+        wrappers.forEach((wrapper) => {
+            const existing = wrapper.querySelector('.transient-watermark');
+            if (existing) existing.remove();
+            const transient = document.createElement('div');
+            transient.className = 'transient-watermark';
+            Object.assign(transient.style, {
+                position: 'absolute', top: '0', left: '0', width: '100%', height: '100%',
+                zIndex: 25, pointerEvents: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center'
+            });
+            transient.innerHTML = `<div style="color: rgba(255,0,0,0.08); font-weight:700; transform: rotate(-25deg); font-size: clamp(12px, 2.8vw, 28px); user-select:none;">
+                    SBTET • CONFIDENTIAL • ${new Date().toLocaleString()}
+                </div>`;
+            wrapper.appendChild(transient);
+            setTimeout(() => { transient.remove(); }, 5500);
         });
-        window.addEventListener('blur', function() { document.body.style.opacity = '0.1'; });
-        window.addEventListener('focus', function() { document.body.style.opacity = '1'; });
-    </script>
+    }
+
+    window.addEventListener('beforeunload', () => {
+        try { if (window.watermarkUpdateInterval) clearInterval(window.watermarkUpdateInterval); } catch (e) {}
+    });
+
+    // Kick off
+    renderPDF().catch(e => {
+        console.error('[viewer] top-level renderPDF error:', e);
+        showLoaderError('Failed to initialize viewer. Check Console for details.');
+    });
+</script>
+        
 </body>
 </html>

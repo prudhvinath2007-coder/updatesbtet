@@ -112,3 +112,12 @@ button:hover, .btn-primary:hover { background: #1d4ed8; }
 /* Utils */
 .flash-msg { background: #fee2e2; color: #991b1b; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; }
 .footer { text-align: center; padding: 2rem 1rem; font-size: 0.9rem; color: #6b7280; }
+
+
+/* At the end of file or under .table-wrapper section */
+@media (max-width: 768px) {
+    .table-wrapper, .data-table {
+        overflow-x: auto;
+        min-width: 400px; /* or as needed */
+    }
+}

@@ -9,13 +9,14 @@
         <form action="{{ url_for('login') }}" method="POST">
             <div style="text-align: left; margin-bottom: 1rem;">
                 <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Username</label>
-                <input type="text" name="username" required placeholder="Enter username" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                <input type="email" name="username" required placeholder="Enter Email" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
             </div>
             
-            <div style="text-align: left; margin-bottom: 1.5rem;">
-                <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Password</label>
-                <input type="password" name="password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
-            </div>
+<div style="text-align: left; margin-bottom: 1.5rem;">
+    <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Password</label>
+    <input type="password" name="password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" id="password">
+    <input type="checkbox" id="show-password-checkbox">Show Password  </div>
+            
             
             <button type="submit" style="width: 100%; background: #2563eb; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>
         </form>
@@ -25,4 +26,23 @@
         </p>
     </section>
 </div>
+<script nonce="{{ csp_nonce }}">
+    function myFunction() {
+        var x = document.getElementById("password");
+        if (x.type == "password") {
+            x.type = "text";
+        } else {
+            x.type = "password";
+        }
+    }
+
+    // Attach the function to the checkbox's change event after the DOM is loaded
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const checkbox = document.getElementById('show-password-checkbox');
+        if (checkbox) {
+            checkbox.addEventListener('change', myFunction);
+        }
+    });
+</script>
+
 {% endblock %}

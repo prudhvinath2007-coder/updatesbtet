@@ -6,6 +6,9 @@
     <p>Contribute previous question papers for the community.</p>
     <p class="hint" style="text-align: center;">No registration required to upload.</p>
 </div>
+<script nonce="{{ csp_nonce }}">
+console.log("OK");
+</script>
 
 <section class="card upload-card" style="border-left-color: #059669; max-width: 800px; margin: 0 auto;">
     <div class="card-header">
@@ -30,7 +33,7 @@
             </div>
             <div class="form-group">
                 <label>Subject Name</label>
-                <input type="text" name="subject" placeholder="e.g. Java Programming" required>
+                <input type="text" name="subject" placeholder="C Programming/Chaptername" required>
             </div>
             <div class="form-group">
                 <label>Exam Type</label>
@@ -39,6 +42,10 @@
                     <option value="Mid 1">Mid 1</option>
                     <option value="Mid 2">Mid 2</option>
                     <option value="Semester">Semester End Exam</option>
+                    <option value="GuessPaper">Guess paper</option>
+                    <option value="Imp notes">Chapter Notes</option>
+
+
                 </select>
             </div>
             <div class="form-group">

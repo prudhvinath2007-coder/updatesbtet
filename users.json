@@ -3,5 +3,35 @@
         "password": "pbkdf2:sha256:600000$d1tUFaCPXwe4Glzx$80786265e3fa7389933556f5d6a17325d78ec41cee693a8df63686d309e3c896",
         "mobile": "6301599722",
         "joined_date": "2025-12-04"
+    },
+    "prudhvinath": {
+        "password": "pbkdf2:sha256:600000$hEJ2xaMoxtbFeRyT$3b9c2404b2425619f23eb12e255036224a6ca8d7f9d0bcf271c67b854585b3fd",
+        "mobile": "6301599722",
+        "pin": "23004-CS-066",
+        "joined": "2025-12-05"
+    },
+    "prudhviyadavalli": {
+        "password": "pbkdf2:sha256:600000$BtcPWTFEuOMWLVr5$2fa78052b6ed8043d189f001aa464395a1055d3df56b060a425a7ddbdca455f7",
+        "mobile": "9110529254",
+        "pin": "23004-CS-067",
+        "joined": "2025-12-05"
+    },
+    "abc": {
+        "password": "pbkdf2:sha256:600000$aGfQhdrC1NxmzhLo$133f32904f19e875b84d0ab280efeadafae8cfa13ec1e5c83dbfbaf2c2c73d86",
+        "mobile": "8465035231",
+        "pin": "23004-CS-066",
+        "joined": "2025-12-06"
+    },
+    "prudhvinath2007@gmail.com": {
+        "password": "pbkdf2:sha256:600000$lAvgBJqm1VnqzAMw$a6862084b653a249e22ef3089845874e897c6b76b1cf8aa2496e6411f82e845e",
+        "mobile": "6301599722",
+        "pin": "23004-cs-066",
+        "joined": "2025-12-06"
+    },
+    "prudhvinath17@gmail.com": {
+        "password": "pbkdf2:sha256:600000$uxsLOKQHNJBcRrnm$41931b87bbb37b0a28643cdf6761b1cfa691f92e816c289a0dd9e398f466fe20",
+        "mobile": "6301599722",
+        "pin": "23004-cs-066",
+        "joined": "2025-12-06"
     }
 }

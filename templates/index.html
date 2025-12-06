@@ -2,6 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <style>
     .hero-section { text-align: center; padding: 4rem 1rem; }
     .search-card { max-width: 500px; margin: 0 auto; border-top: 5px solid #2563eb; padding: 2rem; transform: scale(1); transition: transform 0.3s; }
@@ -21,14 +22,44 @@
 
 <section class="card search-card">
     <h2 style="text-align: center; margin-bottom: 1.5rem; color: #1f2937;">View Your Results</h2>
+
+    <!-- AdSense Loader (MUST HAVE NONCE) -->
+    <script nonce="{{ csp_nonce }}" async 
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2755066573700476"
+        crossorigin="anonymous"></script>
+
     <form method="POST" action="{{ url_for('index') }}" class="pin-form" style="max-width: 100%;">
+
         <div class="form-group">
             <label for="pin" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; font-weight: 700;">Student PIN</label>
             <input type="text" id="pin" name="pin" class="pin-input" placeholder="e.g. 23004-CS-066" required>
         </div>
+
+        <!-- Consent Checkbox -->
+        <div style="margin-top: 1rem; text-align:left; font-size:0.9rem; color:#444;">
+            <label>
+                <input type="checkbox" id="consentChk" required>
+                I agree that my marks may be used for analytics and insights.
+            </label>
+        </div>
+
         <button type="submit" class="search-btn">Analyze Results 🚀</button>
+
     </form>
 </section>
+
+<!-- Horizontal Ad -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-2755066573700476"
+     data-ad-slot="5925927287"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+
+<!-- SINGLE VALID ADS PUSH (CSP SAFE) -->
+<script nonce="{{ csp_nonce }}">
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
 
 <div class="feature-list">
     <span class="feature-pill">📊 SGPA Trends</span>
@@ -36,4 +67,15 @@
     <span class="feature-pill">📉 Weak Areas</span>
     <span class="feature-pill">🥧 Grade Distribution</span>
 </div>
+
+<!-- Consent Validation Script -->
+<script nonce="{{ csp_nonce }}">
+document.querySelector(".pin-form").addEventListener("submit", function(e) {
+    if (!document.getElementById("consentChk").checked) {
+        e.preventDefault();
+        alert("Please agree to the data usage terms to continue.");
+    }
+});
+</script>
+
 {% endblock %}
