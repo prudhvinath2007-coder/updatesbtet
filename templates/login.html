@@ -1,48 +1,212 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
-    <section class="card" style="width: 100%; max-width: 400px; text-align: center; border-top: 5px solid #2563eb;">
-        <h2 style="color: #111827; margin-bottom: 0.5rem;">👋 Welcome Back</h2>
-        <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">Please login to continue.</p>
-        
+
+<style>
+/* ======== PAGE CENTERING ======== */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+/* ======== LOGIN CARD ======== */
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    padding: 2rem 2.2rem;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-top: 5px solid #2563eb;
+    animation: fadeUp 0.6s ease;
+}
+
+/* Card animation */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ======== TITLE & TEXT ======== */
+.login-title {
+    text-align: center;
+    margin-bottom: 0.3rem;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.login-subtext {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 1.7rem;
+}
+
+/* ======== FLOAT LABEL INPUTS ======== */
+.input-group {
+    position: relative;
+    margin-bottom: 1.6rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 14px 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: transparent;
+    transition: all 0.2s;
+}
+
+.input-field:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    outline: none;
+}
+
+.input-label {
+    position: absolute;
+    top: 14px;
+    left: 12px;
+    font-size: 0.9rem;
+    color: #64748b;
+    background: white;
+    padding: 0 6px;
+    transition: 0.2s ease;
+    pointer-events: none;
+}
+
+.input-field:focus + .input-label,
+.input-field:not(:placeholder-shown) + .input-label {
+    top: -8px;
+    left: 10px;
+    font-size: 0.78rem;
+    color: #2563eb;
+}
+
+/* ======== SHOW PASSWORD AREA ======== */
+.show-pass {
+    margin-top: -8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.show-pass input {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.show-pass label {
+    font-size: 0.85rem;
+    color: #374151;
+    cursor: pointer;
+}
+
+/* ======== BUTTON ======== */
+.login-btn {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.login-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+/* ======== FOOTER LINK ======== */
+.login-footer {
+    text-align: center;
+    margin-top: 1.2rem;
+    color: #475569;
+}
+
+.login-footer a {
+    color: #2563eb;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ======== MOBILE ADJUSTMENTS ======== */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.6rem;
+        border-radius: 14px;
+    }
+    .login-title {
+        font-size: 1.55rem;
+    }
+}
+</style>
+
+
+
+<!-- ================= LOGIN PAGE ================= -->
+<div class="login-wrapper">
+
+    <section class="login-card">
+
+        <h2 class="login-title">👋 Welcome Back</h2>
+        <p class="login-subtext">Please login to continue</p>
+
         <form action="{{ url_for('login') }}" method="POST">
-            <div style="text-align: left; margin-bottom: 1rem;">
-                <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Username</label>
-                <input type="email" name="username" required placeholder="Enter Email" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+
+            <!-- USERNAME -->
+            <div class="input-group">
+                <input type="email" name="username" class="input-field" required placeholder=" " />
+                <label class="input-label">Email</label>
             </div>
-            
-<div style="text-align: left; margin-bottom: 1.5rem;">
-    <label style="font-weight: bold; font-size: 0.85rem; display: block; margin-bottom: 5px;">Password</label>
-    <input type="password" name="password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" id="password">
-    <input type="checkbox" id="show-password-checkbox">Show Password  </div>
-            
-            
-            <button type="submit" style="width: 100%; background: #2563eb; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>
+
+            <!-- PASSWORD -->
+            <div class="input-group">
+                <input type="password" name="password" id="password" class="input-field" required placeholder=" " />
+                <label class="input-label">Password</label>
+            </div>
+
+            <!-- SHOW PASSWORD -->
+            <div class="show-pass">
+                <input type="checkbox" id="show-password-checkbox">
+                <label for="show-password-checkbox">Show Password</label>
+            </div>
+
+            <!-- BUTTON -->
+            <button type="submit" class="login-btn">Login</button>
         </form>
-        
-        <p style="margin-top: 1.5rem; font-size: 0.9rem;">
-            New Student? <a href="{{ url_for('register') }}" style="color: #2563eb; font-weight: bold;">Create Account</a>
+
+        <!-- REGISTER LINK -->
+        <p class="login-footer">
+            New Student?  
+            <a href="{{ url_for('register') }}">Create Account</a>
         </p>
+
     </section>
 </div>
-<script nonce="{{ csp_nonce }}">
-    function myFunction() {
-        var x = document.getElementById("password");
-        if (x.type == "password") {
-            x.type = "text";
-        } else {
-            x.type = "password";
-        }
-    }
 
-    // Attach the function to the checkbox's change event after the DOM is loaded
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const checkbox = document.getElementById('show-password-checkbox');
-        if (checkbox) {
-            checkbox.addEventListener('change', myFunction);
-        }
-    });
+
+
+<!-- ================= JS (Show Password) ================= -->
+<script nonce="{{ csp_nonce }}">
+document.getElementById("show-password-checkbox").addEventListener("change", function() {
+    const input = document.getElementById("password");
+    input.type = this.checked ? "text" : "password";
+});
 </script>
 
 {% endblock %}

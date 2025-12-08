@@ -1,174 +1,276 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <style>
-    /* Custom Result Dashboard Styles */
-    .result-header {
-        text-align: center;
-        margin-bottom: 2rem;
-        color: #1f2937;
-        font-weight: 800;
-        font-size: 2rem;
-    }
-    .summary-card { 
-        background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
-        border-left: 5px solid #2563eb; 
-        margin-bottom: 2rem;
-    }
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        margin-top: 1rem;
-    }
-    .two-col {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-    }
-    .highlight-card {
-        transition: transform 0.2s;
-        border: 1px solid #e5e7eb;
-        padding: 1rem;
-        border-radius: 8px;
-        background: #f9fafb;
-        margin-bottom: 1rem;
-        min-height: 160px;
-    }
-    .highlight-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.07);
-    }
-    .grade-pill, .grade-badge {
-        background: #dbeafe;
-        color: #1e40af;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 0.95em;
-        font-weight: bold;
-        display: inline-block;
-        margin-left: 5px;
-    }
-    .grade-pill.good { background: #bbf7d0; color: #166534; }
-    .grade-badge.good { background: #ecfdf5; color: #047857; }
-    .table-wrapper {
-        overflow-x: auto;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.09);
-        border: 1px solid #e5e7eb;
-        margin-bottom: 1rem;
-        background: #fff;
-        padding: 0.5rem;
-    }
-    .data-table {
-        width: 100%;
-        min-width: 700px;
-        border-collapse: collapse;
-        background: #fff;
-        margin-bottom: 0;
-    }
+/* ------------------------------------------------
+   GLOBAL CARD STYLE
+---------------------------------------------------*/
+.card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    margin-bottom: 2rem;
+    padding: 1.6rem;
+    overflow-x: hidden;
+    transition: 0.15s ease;
+}
+
+.card.no-padding {
+    padding: 0 !important;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* ------------------------------------------------
+   MAIN TITLE
+---------------------------------------------------*/
+.result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 800;
+    color: #111827;
+    font-size: 2rem;
+}
+
+/* ------------------------------------------------
+   FIXED LEFT + RIGHT SPACING (MAIN FIX)
+---------------------------------------------------*/
+.table-container {
+    margin: 0 1rem;  /* spacing ALWAYS visible */
+    position: relative;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    padding: 0.7rem 0; /* top-bottom only */
+}
+
+.table-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Optional scroll fade masks */
+.scroll-mask-left,
+.scroll-mask-right {
+    position: absolute;
+    top: 0;
+    width: 14px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.scroll-mask-left {
+    left: -1rem; /* align with outer margin */
+    background: linear-gradient(to right, #fff 30%, transparent);
+}
+
+.scroll-mask-right {
+    right: -1rem;
+    background: linear-gradient(to left, #fff 30%, transparent);
+}
+
+/* ------------------------------------------------
+   TABLE STYLING
+---------------------------------------------------*/
+.data-table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.8rem 1rem;
+    white-space: nowrap;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table thead th {
+    background: #111827;
+    color: #fff;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: #f9fafb;
+}
+.data-table tbody tr:hover {
+    background: #eef2ff;
+}
+
+/* ------------------------------------------------
+   PROFILE GRID
+---------------------------------------------------*/
+.summary-card {
+    border-left: 6px solid #2563eb;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+    gap: 1.4rem;
+    margin-top: 1rem;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    gap: 1.2rem;
+}
+
+/* ------------------------------------------------
+   HIGHLIGHT CARDS
+---------------------------------------------------*/
+.highlight-card {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 5px solid #ddd;
+    transition: 0.2s ease;
+}
+
+.highlight-card:hover {
+    background: #f3f4f6;
+}
+
+/* ------------------------------------------------
+   TAGS / BADGES
+---------------------------------------------------*/
+.grade-pill {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.grade-pill.good {
+    background: #bbf7d0;
+    color: #166534;
+}
+
+.grade-badge.good {
+    background: #ecfdf5;
+    color: #047857;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* ------------------------------------------------
+   RESPONSIVE ENHANCEMENTS
+---------------------------------------------------*/
+@media (max-width: 700px) {
+    .data-table { min-width: 550px; }
+    .result-header { font-size: 1.6rem; }
+}
+
+@media (max-width: 500px) {
+    .data-table { min-width: 480px; }
     .data-table th, .data-table td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid #e5e7eb;
-        text-align: left;
+        font-size: 0.88rem;
+        padding: 0.55rem 0.65rem;
     }
-    .data-table thead th {
-        background-color: #1f2937;
-        color: white;
-        font-weight: 600;
-        text-align: left;
-        position: relative;
-        z-index: 2;
-    }
-    .data-table tbody tr:nth-child(even) { background-color: #f9fafb; }
-    .data-table tbody tr:hover { background-color: #f3f4f6; }
-
-    @media (max-width: 800px) {
-        .table-wrapper, .data-table { min-width: 400px; }
-        .summary-grid, .two-col {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-        .highlight-card { min-height: 120px; }
-    }
-
-    @media (max-width: 600px) {
-        .data-table th, .data-table td {
-            padding: 0.5rem 0.7rem;
-            font-size: 0.93em;
-        }
-        .result-header { font-size: 1.3rem; }
-    }
+    .result-header { font-size: 1.4rem; }
+}
 </style>
+
 
 <h1 class="result-header">Student Performance Report</h1>
 
+
+<!-- ====================== STUDENT SUMMARY ======================== -->
 <section class="card summary-card">
     <h2>🎓 Student Profile</h2>
+
     <div class="summary-grid">
         <div>
-            <strong>Name:</strong> {{ summary.student_name or "N/A" }}<br>
-            <strong>PIN:</strong> {{ summary.pin or pin }}<br>
-            <strong>Branch:</strong> {{ summary.branch_code or "N/A" }} ({{ summary.scheme or "N/A" }})
+            <strong>Name:</strong> {{ summary.student_name }} <br>
+            <strong>PIN:</strong> {{ summary.pin or pin }} <br>
+            <strong>Branch:</strong> {{ summary.branch_code }} ({{ summary.scheme }})
         </div>
+
         <div>
-            <strong>Center:</strong> {{ summary.center_name or "N/A" }} ({{ summary.center_code or "N/A" }})<br>
-            <strong>CGPA:</strong> <span class="grade-pill good">{{ summary.cgpa or "N/A" }}</span><br>
-            <strong>Credits:</strong> {{ summary.credits_gained or "N/A" }}/{{ summary.total_max_credits or "N/A" }}
+            <strong>Center:</strong> {{ summary.center_name }} ({{ summary.center_code }}) <br>
+            <strong>CGPA:</strong> <span class="grade-pill good">{{ summary.cgpa }}</span> <br>
+            <strong>Credits:</strong> {{ summary.credits_gained }}/{{ summary.total_max_credits }}
         </div>
     </div>
 </section>
 
-<section class="card">
+
+
+<!-- ===================== SEMESTER PROGRESS ======================== -->
+<section class="card no-padding">
     <h2>📈 Semester Progress</h2>
-    {% if sgpa_info %}
-    <div class="table-wrapper">
-        <table class="data-table">
-            <thead>
-            <tr>
-                <th>Semester</th>
-                <th>Credits</th>
-                <th>Total Grade Points</th>
-                <th>SGPA</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for row in sgpa_info %}
-            <tr>
-                <td>{{ row.semester }}</td>
-                <td>{{ row.credits }}</td>
-                <td>{{ row.total_grade_points }}</td>
-                <td><span class="grade-pill">{{ row.sgpa }}</span></td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="table-container">
+        <div class="scroll-mask-left"></div>
+        <div class="scroll-mask-right"></div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Semester</th>
+                        <th>Credits</th>
+                        <th>Total Points</th>
+                        <th>SGPA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in sgpa_info %}
+                    <tr>
+                        <td>{{ row.semester }}</td>
+                        <td>{{ row.credits }}</td>
+                        <td>{{ row.total_grade_points }}</td>
+                        <td><span class="grade-pill">{{ row.sgpa }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <canvas id="sgpaChart" class="chart"></canvas>
-    {% else %}
-    <p>No semester data available.</p>
-    {% endif %}
+
+    <canvas id="sgpaChart" style="width:100%;padding:1rem;"></canvas>
 </section>
 
+
+
+<!-- ====================== HIGHLIGHTS SECTION ====================== -->
 <section class="card">
     <h2>🏆 Highlights & Insights</h2>
+
     <div class="two-col">
-        <div class="highlight-card" style="border-left: 4px solid #059669;">
-            <h3 style="color: #059669;">Best Performance</h3>
-            <p><strong>Theory:</strong> 
+        <div class="highlight-card" style="border-left-color:#059669;">
+            <h3 style="color:#059669;">Best Performance</h3>
+            <p><strong>Theory:</strong>
                 {% if insights.best_theory %}
                     {{ insights.best_theory.SubjectName }} ({{ insights.best_theory.SubjectTotal }} Marks)
-                {% else %}N/A{% endif %}
+                {% else %} N/A {% endif %}
             </p>
+
             <p><strong>Lab:</strong>
                 {% if insights.best_lab %}
                     {{ insights.best_lab.SubjectName }} ({{ insights.best_lab.SubjectTotal }} Marks)
-                {% else %}N/A{% endif %}
+                {% else %} N/A {% endif %}
             </p>
         </div>
 
-        <div class="highlight-card" style="border-left: 4px solid #dc2626;">
-            <h3 style="color: #dc2626;">Areas for Improvement</h3>
+        <div class="highlight-card" style="border-left-color:#dc2626;">
+            <h3 style="color:#dc2626;">Areas for Improvement</h3>
+
             {% if insights.weak_subjects %}
             <ul>
                 {% for s in insights.weak_subjects[:3] %}
@@ -182,105 +284,104 @@
     </div>
 </section>
 
-<section class="card">
+
+
+<!-- ====================== TOP SUBJECTS =========================== -->
+<section class="card no-padding">
     <h2>Top Subjects</h2>
-    {% if insights.top_subjects %}
-    <div class="table-wrapper">
-        <table class="data-table">
-            <thead>
-            <tr>
-                <th>Subject</th>
-                <th>Code</th>
-                <th>Type</th>
-                <th>Semester</th>
-                <th>Marks</th>
-                <th>Grade</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for s in insights.top_subjects %}
-            <tr>
-                <td>{{ s.SubjectName }}</td>
-                <td>{{ s.Subject_Code }}</td>
-                <td>{{ s.Type }}</td>
-                <td>{{ s.Semester }}</td>
-                <td>{{ s.SubjectTotal }}</td>
-                <td><span class="grade-badge good">{{ s.HybridGrade }}</span></td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="table-container">
+        <div class="scroll-mask-left"></div>
+        <div class="scroll-mask-right"></div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Sem</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in insights.top_subjects %}
+                    <tr>
+                        <td>{{ s.SubjectName }}</td>
+                        <td>{{ s.Subject_Code }}</td>
+                        <td>{{ s.Type }}</td>
+                        <td>{{ s.Semester }}</td>
+                        <td>{{ s.SubjectTotal }}</td>
+                        <td><span class="grade-badge good">{{ s.HybridGrade }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    {% else %}
-    <p>No subjects found.</p>
-    {% endif %}
 </section>
 
+
+
+<!-- ====================== GRADE DISTRIBUTION ====================== -->
 <section class="card">
     <h2>Grade Distribution</h2>
-    <canvas id="gradeChart"></canvas>
 
-    <div style="margin:20px 0;">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-XXXX"
-             data-ad-slot="SLOT_ID"></ins>
-        <script nonce="{{ csp_nonce }}">
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
+    <canvas id="gradeChart"></canvas>
 </section>
 
-<section class="card">
+
+
+<!-- ========================= ALL SUBJECTS ======================== -->
+<section class="card no-padding">
     <h2>All Subjects</h2>
-    <div class="table-wrapper">
-        <table class="data-table">
-            <thead>
-            <tr>
-                <th>Semester</th>
-                <th>Subject</th>
-                <th>Code</th>
-                <th>Type</th>
-                <th>Marks</th>
-                <th>Grade</th>
-                <th>Grade Point</th>
-                <th>Credits</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for s in subjects %}
-            <tr>
-                <td>{{ s.Semester }}</td>
-                <td>{{ s.SubjectName }}</td>
-                <td>{{ s.Subject_Code }}</td>
-                <td>{{ s.Type }}</td>
-                <td>{{ s.SubjectTotal }}</td>
-                <td>{{ s.HybridGrade }}</td>
-                <td>{{ s.GradePoint }}</td>
-                <td>{{ s.CreditsGained }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="table-container">
+        <div class="scroll-mask-left"></div>
+        <div class="scroll-mask-right"></div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Sem</th>
+                        <th>Subject</th>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                        <th>GP</th>
+                        <th>Credits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in subjects %}
+                    <tr>
+                        <td>{{ s.Semester }}</td>
+                        <td>{{ s.SubjectName }}</td>
+                        <td>{{ s.Subject_Code }}</td>
+                        <td>{{ s.Type }}</td>
+                        <td>{{ s.SubjectTotal }}</td>
+                        <td>{{ s.HybridGrade }}</td>
+                        <td>{{ s.GradePoint }}</td>
+                        <td>{{ s.CreditsGained }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
 
 {% endblock %}
 
 {% block scripts %}
-
-<!-- Load Chart.js -->
 <script nonce="{{ csp_nonce }}" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Data -->
 <script nonce="{{ csp_nonce }}">
     const sgpaData = {{ sgpa_info | tojson }};
     const gradeCounts = {{ insights.grade_counts | tojson }};
 </script>
-
-<!-- Debug -->
-<script nonce="{{ csp_nonce }}">
-    console.log("OK");
-</script>
-
 {% endblock %}
